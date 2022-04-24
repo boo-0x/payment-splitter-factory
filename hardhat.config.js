@@ -67,4 +67,23 @@ module.exports = {
         enabled: true,
         runs: 200,
     },
+    func: {
+        toReef: function toReef(value) {
+            return ethers.utils.parseUnits(value.toString(), "ether");
+        },
+        getSignerAndAddress: async (name) => {
+            const signer = await reef.getSignerByName(name);
+            if (!(await signer.isClaimed())) {
+                console.log(`\tClaiming default account for ${name}...`);
+                await signer.claimDefaultAccount();
+            }
+            const address = await signer.getAddress();
+
+            return [signer, address];
+        },
+        logBalance: async (signer, name) => {
+            const balance = Number(await signer.getBalance()) / 1e18;
+            console.log(`Balance of ${name}: ${balance}`);
+        },
+    },
 };

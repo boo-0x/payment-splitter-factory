@@ -1,5 +1,4 @@
 const { expect, assert } = require("chai");
-const { ethers } = require("hardhat");
 
 describe("******************* PaymentSplitterFactory *******************", () => {
     let paymentSplitter;
@@ -8,10 +7,10 @@ describe("******************* PaymentSplitterFactory *******************", () =>
         console.log(`Running network => ${hre.network.name}\n`);
 
         // Get accounts
-        [owner, ownerAddress] = await getSignerAndAddress(
+        [owner, ownerAddress] = await config.func.getSignerAndAddress(
             hre.network.name == "reef" ? "alice" : "account1"
         );
-        [bob, bobAddress] = await getSignerAndAddress(
+        [bob, bobAddress] = await config.func.getSignerAndAddress(
             hre.network.name == "reef" ? "bob" : "account2"
         );
         charlie = await reef.getSignerByName(hre.network.name == "reef" ? "charlie" : "account3");
@@ -92,7 +91,7 @@ describe("******************* PaymentSplitterFactory *******************", () =>
 
     it("Should split amounts received", async () => {
         // Deposit in PaymentSplitter
-        const depositAmount = toReef(2000);
+        const depositAmount = config.func.toReef(2000);
         await transferHelper.to(paymentSplitter.address, { value: depositAmount });
 
         // Release owner's share
@@ -122,7 +121,7 @@ describe("******************* PaymentSplitterFactory *******************", () =>
 
     it("Should withdraw from another contract", async () => {
         // Deposit in PullPayment contract
-        const depositAmount = toReef(500);
+        const depositAmount = config.func.toReef(500);
         await pullPayment.connect(bob).deposit(paymentSplitter.address, { value: depositAmount });
 
         // Withdraw from PullPayment
@@ -138,21 +137,6 @@ describe("******************* PaymentSplitterFactory *******************", () =>
     });
 });
 
-getSignerAndAddress = async (name) => {
-    const signer = await reef.getSignerByName(name);
-    if (!(await signer.isClaimed())) {
-        console.log(`\tClaiming default account for ${name}...`);
-        await signer.claimDefaultAccount();
-    }
-    const address = await signer.getAddress();
-
-    return [signer, address];
-};
-
-toReef = (value) => {
-    return ethers.utils.parseUnits(value.toString(), "ether");
-};
-
 revertedWith = async (promise, message) => {
     try {
         await promise;
@@ -161,9 +145,4 @@ revertedWith = async (promise, message) => {
     } catch (error) {
         expect(error.message).contains(message);
     }
-};
-
-logBalance = async (signer, name) => {
-    const balance = Number(await signer.getBalance()) / 1e18;
-    console.log(`Balance of ${name}: ${balance}`);
 };

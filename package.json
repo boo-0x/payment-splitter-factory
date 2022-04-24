@@ -4,6 +4,8 @@
         "compile": "hardhat compile",
         "deploy:testnet": "yarn hardhat run ./scripts/deploy.js --network reef_testnet",
         "deploy:mainnet": "yarn hardhat run ./scripts/deploy.js --network reef_mainnet",
+        "create-splitter:testnet": "yarn hardhat run ./scripts/create-payment-splitter.js --network reef_testnet",
+        "create-splitter:mainnet": "yarn hardhat run ./scripts/create-payment-splitter.js --network reef_mainnet",
         "test": "yarn hardhat test --network reef",
         "test:testnet": "yarn hardhat test --network reef_testnet",
         "console": "yarn hardhat console",
