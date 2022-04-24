@@ -1,7 +1,7 @@
 # Payment Splitter Factory
 
 Factory contract to create instances of **PaymentSplitter** the contract.
-The _PaymentSplitter_ contract is an adaptation of the [OpenZeppelin verion](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/finance/PaymentSplitter.sol). This version does not include support for ERC20 tokens and adds the capability to withdraw REEF from a third party contract that requires the caller to be the recipient address of the available balance.
+The _PaymentSplitter_ contract is an adaptation of [OpenZeppelin's PaymentSplitter](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/finance/PaymentSplitter.sol). This version does not include support for ERC20 tokens and adds the capability to withdraw REEF from a third party contract that requires the caller to be the recipient address of the available balance.
 
 <p align="center">
 	<img alt="Logo" src="./diagram.png" width="700"/>
