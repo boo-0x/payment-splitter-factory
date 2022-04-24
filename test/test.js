@@ -20,7 +20,6 @@ describe("******************* PaymentSplitterFactory *******************", () =>
         // Setup data
         payees = [ownerAddress, bobAddress, charlieAddress];
         shares = [3000, 5000, 2000];
-        amountSent = toReef(2000);
         provider = await reef.getProvider();
 
         // PaymentSplitter contract
@@ -59,9 +58,24 @@ describe("******************* PaymentSplitterFactory *******************", () =>
             transferHelper = TransferHelper.attach(transferHelperAddress);
         }
         console.log(`\tTransferHelper contact deployed to ${transferHelper.address}`);
+
+        // PullPayment contract
+        const pullPaymentAddress = config.contracts[hre.network.name].pullPayment;
+        const PullPayment = await reef.getContractFactory("PullPayment", owner);
+        if (!pullPaymentAddress || pullPaymentAddress == "") {
+            // Deploy
+            console.log("\tDeploying PullPayment...");
+            pullPayment = await PullPayment.deploy();
+            await pullPayment.deployed();
+        } else {
+            // Get existing contract
+            pullPayment = PullPayment.attach(pullPaymentAddress);
+        }
+        console.log(`\tPullPayment contact deployed to ${pullPayment.address}`);
     });
 
     it("Should create new PaymentSplitter contract", async () => {
+        // Create PaymentSplitter instance
         const tx = await paymentSplitterFactory.createPaymentSplitter(payees, shares);
         const paymentSplitterAddress = (await tx.wait()).events[0].args[0];
         paymentSplitter = PaymentSplitter.attach(paymentSplitterAddress);
@@ -77,30 +91,50 @@ describe("******************* PaymentSplitterFactory *******************", () =>
     });
 
     it("Should split amounts received", async () => {
-        const tx = await transferHelper.to(paymentSplitter.address, { value: amountSent });
-        receipt = await tx.wait();
+        // Deposit in PaymentSplitter
+        const depositAmount = toReef(2000);
+        await transferHelper.to(paymentSplitter.address, { value: depositAmount });
 
+        // Release owner's share
         const iniOwnerBalance = await owner.getBalance();
         await paymentSplitter.connect(bob).release(ownerAddress);
         const endOwnerBalance = await owner.getBalance();
 
-        const expectedOwnerShare = Number(amountSent) * (shares[0] / 10000);
+        const expectedOwnerShare = Number(depositAmount) * (shares[0] / 10000);
         expect(Number(endOwnerBalance.sub(iniOwnerBalance))).to.equal(expectedOwnerShare);
         expect(Number(await paymentSplitter.released(ownerAddress))).to.equal(expectedOwnerShare);
         expect(Number(await provider.getBalance(paymentSplitter.address))).to.equal(
-            amountSent - expectedOwnerShare
+            depositAmount - expectedOwnerShare
         );
 
+        // Release Bob's share
         const iniBobBalance = await bob.getBalance();
         await paymentSplitter.connect(owner).release(bobAddress);
         const endBobBalance = await bob.getBalance();
 
-        const expectedBobShare = Number(amountSent) * (shares[1] / 10000);
+        const expectedBobShare = Number(depositAmount) * (shares[1] / 10000);
         expect(Number(endBobBalance.sub(iniBobBalance))).to.equal(expectedBobShare);
         expect(Number(await paymentSplitter.released(bobAddress))).to.equal(expectedBobShare);
         expect(Number(await provider.getBalance(paymentSplitter.address))).to.equal(
-            amountSent - expectedOwnerShare - expectedBobShare
+            depositAmount - expectedOwnerShare - expectedBobShare
         );
+    });
+
+    it("Should withdraw from another contract", async () => {
+        // Deposit in PullPayment contract
+        const depositAmount = toReef(500);
+        await pullPayment.connect(bob).deposit(paymentSplitter.address, { value: depositAmount });
+
+        // Withdraw from PullPayment
+        await paymentSplitter.connect(bob).withdrawFromContract(pullPayment.address);
+
+        // Release owner's share
+        const iniOwnerBalance = await owner.getBalance();
+        await paymentSplitter.connect(bob).release(ownerAddress);
+        const endOwnerBalance = await owner.getBalance();
+
+        const expectedOwnerShare = Number(depositAmount) * (shares[0] / 10000);
+        expect(Number(endOwnerBalance.sub(iniOwnerBalance))).to.equal(expectedOwnerShare);
     });
 });
 

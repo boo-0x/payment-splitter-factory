@@ -7,7 +7,7 @@ This project has been created using the [Hardhat-reef-template](https://github.c
 Mainnet:
 [0x0](https://reefscan.com/contract/0x0)
 
-Testnet: [0x4Dd5bA16e96C693531cEAfE5E13913aa00E3FCAD](https://testnet.reefscan.com/contract/0x4Dd5bA16e96C693531cEAfE5E13913aa00E3FCAD)
+Testnet: [0x5c6713098D692399D5eecb6Ef54c69E60512fcbF](https://testnet.reefscan.com/contract/0x5c6713098D692399D5eecb6Ef54c69E60512fcbF)
 
 ## Installing
 

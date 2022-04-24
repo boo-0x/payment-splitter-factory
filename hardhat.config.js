@@ -47,13 +47,18 @@ module.exports = {
     },
     contracts: {
         reef: {
-            paymentSplitterFactory: "",
-            transferHelper: "",
+            paymentSplitterFactory: "0x0230135fDeD668a3F7894966b14F42E65Da322e4",
+            transferHelper: "0x546411ddd9722De71dA1B836327b37D840F16059",
+            pullPayment: "0xD3ba2aA7dfD7d6657D5947f3870A636c7351EfE4",
         },
         reef_testnet: {
-            paymentSplitterFactory: "0x4Dd5bA16e96C693531cEAfE5E13913aa00E3FCAD",
+            paymentSplitterFactory: "0x5c6713098D692399D5eecb6Ef54c69E60512fcbF",
             transferHelper: "0x2c1BB0Cb25dC9234cC3a4a8bF8d70E7249a8f82A",
+            pullPayment: "0x8425da8A15Dc9F5395dBa0C8C4D2116d80FA3aA9",
         },
+    },
+    contractSizer: {
+        except: ["/test"],
     },
     mocha: {
         timeout: 150000,

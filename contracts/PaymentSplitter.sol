@@ -2,13 +2,17 @@
 // Adaptation of the OpenZeppelin Contracts v4.4.1 (finance/PaymentSplitter.sol)
 pragma solidity ^0.8.10;
 
+interface IWithdrawal {
+    function withdraw() external;
+}
+
 /**
  * @title PaymentSplitter
- * @dev This contract allows to split Reef payments among a group of accounts. The sender does not need to be aware
- * that the Reef will be split in this way, since it is handled transparently by the contract.
+ * @dev This contract allows to split REEF payments among a group of accounts. The sender does not need to be aware
+ * that the REEF will be split in this way, since it is handled transparently by the contract.
  *
  * The split can be in equal parts or in any other arbitrary proportion. The way this is specified is by assigning each
- * account to a number of shares. Of all the Reef that this contract receives, each account will then be able to claim
+ * account to a number of shares. Of all the REEF that this contract receives, each account will then be able to claim
  * an amount proportional to the percentage of total shares they were assigned.
  *
  * `PaymentSplitter` follows a _pull payment_ model. This means that payments are not automatically forwarded to the
@@ -28,11 +32,11 @@ contract PaymentSplitter {
     address[] public payees;
 
     /**
-     * @dev Creates an instance of `PaymentSplitter` where each account in `payees` is assigned the number of shares at
-     * the matching position in the `shares` array.
+     * @dev Creates an instance of `PaymentSplitter` where each account in `_payees` is assigned the number of shares at
+     * the matching position in the `_shares` array.
      *
-     * All addresses in `payees` must be non-zero. Both arrays must have the same non-zero length, and there must be no
-     * duplicates in `payees`.
+     * All addresses in `_payees` must be non-zero. Both arrays must have the same non-zero length, and there must be no
+     * duplicates in `_payees`.
      */
     constructor(address[] memory _payees, uint256[] memory _shares) payable {
         require(
@@ -47,9 +51,9 @@ contract PaymentSplitter {
     }
 
     /**
-     * @dev The Reef received will be logged with {PaymentReceived} events. Note that these events are not fully
-     * reliable: it's possible for a contract to receive Reef without triggering this function. This only affects the
-     * reliability of the events, and not the actual splitting of Reef.
+     * @dev The REEF received will be logged with {PaymentReceived} events. Note that these events are not fully
+     * reliable: it's possible for a contract to receive REEF without triggering this function. This only affects the
+     * reliability of the events, and not the actual splitting of REEF.
      *
      * To learn more about this see the Solidity documentation for
      * https://solidity.readthedocs.io/en/latest/contracts.html#fallback-function[fallback
@@ -60,7 +64,7 @@ contract PaymentSplitter {
     }
 
     /**
-     * @dev Triggers a transfer to `account` of the amount of Reef they are owed, according to their percentage of the
+     * @dev Triggers a transfer to `account` of the amount of REEF they are owed, according to their percentage of the
      * total shares and their previous withdrawals.
      */
     function release(address payable account) external {
@@ -79,6 +83,15 @@ contract PaymentSplitter {
         require(success, "PaymentSplitter: unable to send value, recipient may have reverted");
 
         emit PaymentReleased(account, payment);
+    }
+
+    /**
+     * @dev Withdraws available balance for contract with address `addr`. To be used with contracts that implement the
+     * _pull payment_ model with a _withdrawal()_ function.
+     */
+    function withdrawFromContract(address addr) external {
+        require(shares[msg.sender] > 0, "PaymentSplitter: caller has no shares");
+        IWithdrawal(addr).withdraw();
     }
 
     /**

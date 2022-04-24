@@ -2,30 +2,30 @@
 
 
 
+> PaymentSplitterFactory
 
 
 
-
-
+*Factory for creating new _PaymentSplitter_ contracts.*
 
 ## Methods
 
 ### createPaymentSplitter
 
 ```solidity
-function createPaymentSplitter(address[] payees, uint256[] shares_) external nonpayable
+function createPaymentSplitter(address[] payees, uint256[] shares) external nonpayable
 ```
 
 
 
-
+*Creates an instance of _PaymentSplitter_ where each account in `payees` is assigned the number of shares at the matching position in the `shares` array. Emits a {PaymentSplitterCreated} with the address of the new instance.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | payees | address[] | undefined |
-| shares_ | uint256[] | undefined |
+| shares | uint256[] | undefined |
 
 
 
